@@ -1,3 +1,5 @@
+# Tetris DX Power Calculator 1.0 by Dunspixel
+
 # This is a recreation of the code used to calculate Power in Tetris DX, based on my analysis of the disassembly.
 # The original source code was probably a lot simpler and easy to understand than this.
 
@@ -16,7 +18,7 @@ pow2_16 = 65536         # Coefficient for writing upper two bytes
 pow2_8 = 256            # Coefficient for byte operations
 marathon = 0
 ultra = 1
-sprint = 2
+fortylines = 2
 
 def get_upper():
     # Get the upper two bytes of power
@@ -97,6 +99,8 @@ lines = int(input("Lines: "))
 profile_power = int(input("Profile Power: "))
 print("Note: Games Played is capped at 5 in SRAM, so enter 5 if you've played a lot")
 games = int(input("Games Played (prior to this one): "))
+#print("Marathon = 0, Ultra = 1, 40Lines = 2")
+#mode = int(input("Game Mode: "))
 
 if games > 5:
     games = 5
@@ -110,7 +114,8 @@ low_line_penalty()
 # Current Game Power has been calculated
 cur_game_power = power
 
-# TODO: 40Lines specific logic
+#if mode == fortylines:
+    # TODO: 40Lines specific logic
 
 # Calculate new profile power - (G + P * N) / N+1
 # G is Current Game Power, P is previous Profile Power, and N is Games Played

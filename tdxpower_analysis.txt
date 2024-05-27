@@ -1,0 +1,348 @@
+In-Game SRAM
+AC09 - 80 + Current User Profile (0-3)
+AC0A - Current Mode (0 = Marathon, 1 = Ultra, 2 = Sprint, 3 = VS. Com)
+AC10-AC11 - Singles
+AC12-AC13 - Doubles
+AC14-AC15 - Triples
+AC16-AC17 - Tetrises
+AC24-AC25 - Lines
+AC26-AC29 - Score
+AF89-AF8C - Score (BCD)
+AF8D-AF8F - Lines (BCD)
+AFB2-AFB3 - Soft Drop Points
+
+Profile 1 SRAM - BC80-BCFF
+BC80 - ???
+BC81 - ???
+BC82 - Number of games played (max 5)
+BC83-BC85 - Total Lines (BCD)
+BC86 - ???
+BC87-BC88 - Power
+
+For other profiles, apply same offsets to start address
+Profile 2 SRAM - BD00-BD7F
+Profile 3 SRAM - BD80-BDFF
+Profile 4 SRAM - BE00-BE7F
+
+BE82-BE83 - Profile 1 Power
+
+WRAM
+DB60-DB61 - Current Game Power
+DB68 - Number of games played (max 6)
+
+The code below starts after exiting from the Game Over screen.
+If there is a celebratory cutscene, this will execute after the cutscene finishes.
+
+Note: Registers in uppercase, flags in lowercase
+
+ROM5
+
+; Load Score and Soft-Drop Points
+6EBA - Load AC26 pointer into HL
+6EBD - Load AFB2 pointer into DE
+
+; Subtract Soft-Drop Points from Score (with bitmask)
+6EC0 - Set B to 0
+6EC2 - Load value from AFB2 (via DE) - lower SD byte - into A
+; This AND means only soft-drop % 16 is considered
+6EC3 - AND A with value F0
+6EC5 - Load value of A into C
+6EC6 - Load value from AC26 (via HL) - lowest score byte - into A
+6EC7 - Subtract C from A
+6EC8 - Load A into AC26, increment HL to AC27
+6EC9 - Increment E to AFB3
+6ECA - Load value from AFB3 (via DE) - upper SD byte - into A
+6ECB - Load value of A into C
+6ECC - Load value from AC27 (via HL) - second score byte - into A
+6ECD - Subtract C+c from A
+6ECE - Load A into AC27, increment HL to AC28
+6ECF - Increment E to AFB4 (not used in calc)
+6ED0 - Load value from AC28 (via HL) - third score byte - into A
+6ED1 - Subtract B+c from A (since B is 0, this just subtracts c)
+6ED2 - Load A into AC28, increment HL to AC29
+6ED3 - Load value from AC29 (via HL) - upper score byte - into A
+6ED4 - Subtract B+c from A
+6ED5 - Load A into AC29
+
+; Load score into registers
+; B will be 0 at this point as its lowest bit corresponds to a value of 16,777,216 - higher than the score cap
+6ED6 - Load AC24 pointer into HL
+6ED9 - Load value of AC26 into A
+6EDC - Load value of A into E
+6EDD - Load value of AC27 into A
+6EE0 - Load value of A into D
+6ED1 - Load value of AC28 into A
+6ED4 - Load value of A into C
+6ED5 - Load value of AC29 into A
+6EE8 - Load value of A into B
+6EE9 - Call function ROM0:0637
+
+ROM0
+
+; This function is effectively dividing score by lines
+; Initialse loop counter - will run 16 times
+0637 - XOR A with itself
+0638 - Load value 10 into A
+063A - Load value of A into FF88
+
+; Start Loop
+; Bit-shift BCDE, effectively doubling it
+; If carry flag is set, shift that into E
+063C - Bit-shift E to the left
+063E - Bit-shift D to the left
+0640 - Bit-shift C to the left
+0642 - Bit-shift B to the left
+
+; Subtract (Lines % 256) from C
+; This value appears to do nothing, but if the result is negative it will set the carry flag
+0644 - Load value of C into A
+0645 - Subtract value of AC24 (via HL) from A
+0646 - Load value of A into C
+0647 - Increment HL to AC25
+
+; Subtract (Lines / 256) from B
+; Same deal with C - for setting the carry flag
+0648 - Load value of B into A
+0649 - Subtract value of AC25 (via HL) from A
+064A - Load value of A into B
+064B - Decrement HL to AC24
+
+; Apply line bonuses if carry flag is set
+; Add (Lines % 256) to C
+; Add (Lines / 256) to B
+064C - Jump to 0657 if c is false
+064E - Load value of C into A
+064F - Add value of AC24 (via HL) to A
+0650 - Load value of A into C
+0651 - Increment HL to AC25
+0652 - Load value of B into A
+0653 - Add value of AC25 (via HL)+c to A
+0654 - Load value of A into B
+0655 - Decrement HL to AC24
+
+; Clear negative/carry flags, unless 064C jump executed
+0656 - Set c to 1, n and h to 0
+0657 - Invert c
+
+; Decrement loop counter
+0658 - Load value from FF88 into A (10)
+065A - Decrement A
+065B - Load value of A into FF88
+065D - Jump to 063C if z is false
+
+; Bit-shift DE
+; Only this part of the power is retained
+065F - Bit-shift E to the left
+0661 - Bit-shift D to the left
+0663 - Return from function
+
+ROM5
+
+; Check lines
+6EEC - Load AC25 pointer into HL
+6EEF - Load value from AC25 (via HL) into A and decrement HL to AC24
+6EF0 - AND A with itself
+6EF1 - Jump to 6F25 if z is false
+
+; 6EF0 will set z to true and run this section if A (i.e. lines / 256) is 0
+6EF3 - Load value of AC24 into A
+6EF4 - AND A with itself
+6EF5 - Jump to 6F25 if z is true
+
+; 6EF5 will set z to true and SKIP this section if A (i.e. lines % 256) is 0
+; This section will only run if cleared lines is between 1 and 255
+6EF7 - Set c to true if A is less than OB
+6EF9 - Jump to 6F18 if c is true
+6EFB - Set c to true if A is less than 10
+6EFD - Jump to 6F1C if c is true
+6EFF - Set c to true if A is less than 15
+6F01 - Jump to 6F25 is c is false
+
+; This section will only run if cleared lines is between 16 and 20
+6F03 - Load value of D into H
+6F04 - Load value of E into L
+6F05 - Bit-shift H to the right
+6F07 - Bit-shift L to the right, including c
+6F09 - Bit-shift H to the right
+6F0B - Bit-shift L to the right, including c
+6F0D - Load value of E into A
+6F0E - Subtract value of L from A
+6F0F - Load value of A into E
+6F10 - Jump to 6F13 if c is false
+
+; This will only run if L is greater than E
+; I have no idea why it does this
+6F12 - Decrement D
+
+; Effectively reduce power in DE by a quarter
+6F13 - Load value of D into A
+6F14 - Subtract value of H from A
+6F15 - Load value of A into D
+6F16 - Jump to 6F25
+
+; This section will only run if cleared lines is between 1 and 10
+6F18 - Bit-shift D to the right
+6F1A - Bit-shift E to the right, including c
+
+; This section will only run if cleared lines is between 1 and 15
+6F1C - Bit-shift D to the right
+6F1E - Bit-shift E to the right, including c
+6F20 - Jump to 6F25
+
+; I don't think this is hit, unless something else jumps here
+6F22 - Set DE to 0000
+
+; Store DE (Current Game Power) in memory
+6F25 - Load value of D into A
+6F26 - Load value of A into DB61
+6F29 - Load value of E into A
+6F2A - Load value of A into DB60
+
+; Clear DB68 and DB69
+6F2D - XOR A with itself, clearing it
+6F2E - Load value of A into DB68
+6F31 - Load value of A into DB69
+
+; Load selected user profile
+6F34 - Load value of AC09 into A
+6F37 - AND A with value 0F
+6F39 - Call function 7029
+
+; Prepare SRAM address based on selected profile
+; Interestingly, this actually retrieves memory addresses from the opcodes after this function
+7029 - Load constant value 7035 into HL
+702C - Add value of A to A
+702D - Set D to 0
+702F - Load value of A into E
+7030 - Add DE to HL
+7031 - Load value pointed by HL into A, increment HL
+7032 - Load value pointed by HL into H
+7033 - Load value of A into L
+7034 - Return from function
+
+; Opcodes (?) used by function at 7029 to retrieve profile memory addresses
+; Most likely not actually executed
+; Profile 1: BC81
+7035 - 81
+7036 - BC
+; Profile 2: BD01
+7037 - 01
+7038 - BD
+; Profile 3: BD81
+7039 - 81
+703A - BD
+; Guest:     BE01
+703B - 01
+703C - BE
+
+; From this point forward, I will be using Profile 1 SRAM addresses for descriptions
+; Clear BC81 and copy BC82 (games played) into DB68
+; The stored number of games played is capped at 5
+6F3C - XOR A with itself
+6F3D - Load value of A into BC81 (via HL), increment HL to BC82
+6F3E - Load value of BC82 (via HL) into A
+6F3F - Load value of A into DB68
+6F42 - Set c to true if A is less than 5
+6F44 - Jump to 6F47 if c is false
+; This is only called if games played is less than 5
+6F46 - Increment A
+6F47 - Load value of A into BC82, increment HL to BC83
+6F48 - Push HL onto stack
+
+; This basically sets L to either 00 or 80, making HL the beginning of the current profile section in SRAM (BC80 in this case)
+6F49 - Load value of L into A
+6F4A - AND A with constant value 80
+
+; Set HL to BCD8
+6F4C - Add 58 to A
+6F4E - Load value of A into L
+
+; Set DE to BCEC
+6F4F - Add 14 to A
+6F51 - Load value of H into D
+6F52 - Load value of A into E
+
+; This is a loop which runs 80 (hex 50) times
+; It copies SRAM addresses BC88-BCD8 into BC9C-BCEC, shifting this section forward by 20 (hex 14) and duplicating BC88-BC9B with BC9C-BCB0
+6F53 - Load constant value 50 into C
+6F55 - Load value of value pointed by HL into A, decrement HL
+6F56 - Load value of A into address pointed by DE
+6F57 - Decrement E
+6F58 - Decrement C
+6F59 - Jump to 6F55 if z is false
+
+; Determine whether current mode is Sprint
+6F5B - Load value of AC0A into A
+; Set zero flag if A is 02
+6F5E - Compare A with constant value 02
+6F60 - Jump to 6F83 if z is false
+
+; This section will only run if the current mode is Sprint
+TODO: 6F62-6F80
+
+; This will run for all modes
+; Set DE to BC83 (total profile lines) and HL to AF8D (lines for current game)
+6F83 - Pop stack into HL (address BC83)
+6F84 - Push HL into stack
+6F85 - Load value of H into D
+6F86 - Load value of L into E
+6F87 - Load constant value AF8D into HL
+6F8A - Load constant value 03 into C
+6F8C - Call function 7055
+
+; This function contains a loop after the XOR, run 3 times
+; Adds AF8D-AF8F to BC83-BC85 as decimal values
+; In other words, adds the lines from your current game to your profile total
+7055 - XOR A with itself
+7056 - Load value pointed by DE into A
+7057 - Add value pointed by HL + c to A
+; This DAA means treat the addition as BCD, not hex
+7058 - Decimal Adjust Accumulator
+7059 - Load value of A into address pointed by DE
+705A - Increment E
+705B - Increment L
+705C - Decrement C
+705D - Jump to 7056 if z is false
+705F - Return from function
+
+; Set HL to Profile Power
+6F8F - Pop stack into HL (address BC83)
+6F90-6F93 - Increment L
+; HL now contains BC87
+6F94 - Push HL into stack
+6F95 - Load value of BC87 (via HL) into A, increment HL to BC88
+6F96 - Load value of BC88 (via HL) into D
+6F97 - Load value of A into E
+6F98 - Load constant value 0000 into HL
+6F9B - Load value of DB68 into A
+; This AND sets z if A is 00
+6F9E - AND A with itself
+6F9F - Jump to 6FA5 if z is true
+
+; This section will only run if number of games played is non-zero
+; This is a loop which multiplies Profile Power by games played and assigns it to HL
+6FA1 - Add DE to HL
+6FA2 - Decrement A
+6FA3 - Jump to 6FA1 if z is false
+
+; Set DE to Current Game Power, then add to HL (Profile Power)
+6FA5 - Load value of DB61 into A
+6FA8 - Load value of A into D
+6FA9 - Load value of DB60 into A
+6FAC - Load value of A into E
+6FAD - Add HL to DE
+
+; Move value of HL into DE
+6FAE - Load constant value 0000 into BC
+6FB1 - Load value of H into D
+6FB2 - Load value of L into E
+
+; Increment DB68, then call bitshift loop again
+; Calculates new Profile Power based on (G + P * N) / N+1, where G is Current Game Power, P is previous Profile Power, and N is Games Played
+6FB3 - Load constant value DB68 into HL
+6FB6 - Increment value of DB68 (via HL)
+6FB7 - Call function 0637
+
+; 0637 is described near the beginning, though HL now contains the number of games played instead of the number of lines
+
+; TODO: 6FBA to end of function

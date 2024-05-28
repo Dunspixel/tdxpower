@@ -3,16 +3,14 @@ This is my (currently incomplete) analysis of the assembly code used to calculat
 
 It's my first time trying to analyse and reverse-engineer assembly code, so I'm not very good at it.
 
-If you'd like to read the analysis, please start with 6E97_calculate_power.txt, then refer to the helper functions when you get to them.
+If you'd like to read the analysis, please start with 6E97_calculate_power.txt, then refer to the helper functions and the infodump when you get to them. For the time being, most of the analysis is in the infodump which I intend to tidy up and add to the assembly code comments later.
 
-I hope this makes sense to people who know GB assembly better than me! At the moment, most of the analysis is just one massive infodump, 
-but I plan on tidying it up later so it's easier to follow.
+I hope this makes sense to people who know GB assembly better than me!
 
 Note: There's some extra logic for 40Lines mode which I haven't looked into yet. I will implement this later.
 
 ## Calculations
-These calculations are run after you press A on the Game Over screen. If there is a celebratory cutscene, the calculations will run after
-the cutscene ends.
+These calculations are run after you press A on the Game Over screen. If there is a celebratory cutscene, the calculations will run after the cutscene ends.
 
 <ul>
     <li>Pc = (((S - D + (D % 16)) / L) * M</li>

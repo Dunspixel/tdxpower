@@ -3,7 +3,7 @@ This is my (currently incomplete) analysis of the assembly code used to calculat
 
 It's my first time trying to analyse and reverse-engineer assembly code, so I'm not very good at it.
 
-If you'd like to read the analysis, please start with 6E97_calculate_power.txt, then refer to the helper functions and the infodump when you get to them. For the time being, most of the analysis is in the infodump which I intend to tidy up and add to the assembly code comments later.
+If you'd like to read the analysis, please start with 6E97_calculate_power.asm, then refer to the helper functions and the infodump when you get to them. For the time being, most of the analysis is in the infodump which I intend to tidy up and add to the assembly code comments later.
 
 I hope this makes sense to people who know GB assembly better than me!
 

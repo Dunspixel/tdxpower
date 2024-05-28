@@ -1,0 +1,47 @@
+Current Game
+AC09 - Lower nybble contains selected User Profile (0-3)
+AC0A - Current Mode (00 = Marathon, 01 = Ultra, 02 = 40Lines, 03 = VS. Com)
+AC10 - Singles (Lower byte)
+AC11 - Singles (Upper byte)
+AC12 - Doubles (Lower byte)
+AC13 - Doubles (Upper byte)
+AC14 - Triples (Lower byte)
+AC15 - Triples (Upper byte)
+AC16 - Tetrises (Lower byte)
+AC17 - Tetrises (Lower byte)
+AC24 - Lines (Lower byte)
+AC25 - Lines (Upper byte)
+AC26 - Score (Lowest byte)
+AC27 - Score
+AC28 - Score
+AC29 - Score (Highest byte)
+AF89 - Score (BCD, lowest two digits)
+AF8A - Score (BCD)
+AF8B - Score (BCD)
+AF8C - Score (BCD, highest digit)
+AF8D - Lines (BCD, lower two digits)
+AF8E - Lines (BCD, middle two digits)
+AF8F - Lines (BCD, upper two digits)
+AFB2 - Soft-drop points (Lower byte)
+AFB3 - Soft-drop points (Upper byte)
+
+Profiles
+BC80 - Profile 1
+BD00 - Profile 2
+BD80 - Profile 3
+BE00 - Guest
+
+Profile Offsets
+02 - Number of games played
+03 - Total Lines (BCD, lower two digits)
+04 - Total Lines (BCD, middle two digits)
+05 - Total Lines (BCD, upper two digits)
+07 - Power (Lower byte)
+08 - Power (Upper byte)
+
+Notes
+AF8A-AF8C - Displayed BCD Score is capped at 9,999,999
+AC26-AC29 - Internal hex score is NOT capped, and can be increased to 2,147,483,647 before overflowing
+AC24-AC25 - Internal lines will overflow at 65,536, but this will not affect displayed BCD lines
+AF8D-AF8F - If BCD lines is over 99,999, the first digit will not be displayed (e.g. 100,000 will display as 00000)
+Profile + 02 - Number of games played is capped at 5

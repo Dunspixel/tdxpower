@@ -3,7 +3,7 @@ This is my (currently incomplete) analysis of the assembly code used to calculat
 
 It's my first time trying to analyse and reverse-engineer assembly code, so I'm not very good at it.
 
-If you'd like to read the analysis, please start with tdxpower_analysis.txt, then refer to the helper functions when you get to them.
+If you'd like to read the analysis, please start with 6E97_calculate_power.txt, then refer to the helper functions when you get to them.
 
 I hope this makes sense to people who know GB assembly better than me! At the moment, most of the analysis is just one massive infodump, 
 but I plan on tidying it up later so it's easier to follow.

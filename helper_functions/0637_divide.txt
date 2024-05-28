@@ -1,6 +1,7 @@
 ; This function divides the 4-byte value in registers BCDE (numerator) by the 2-byte value pointed to by registers HL (denominator)
 ; The resulting value will be stored in registers DE
 ; ROM0 0637 to 0663
+label0637:
 xor  a              ; XOR A with itself, clearing it
 ld   a,10           ; Initialse loop counter to hex 10 (dec 16), then store in FF88
 ld   (ff00+88),a

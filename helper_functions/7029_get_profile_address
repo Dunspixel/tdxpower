@@ -1,6 +1,7 @@
 ; This function gets the SRAM address of the selected profile, plus an offset of 01
 ; The addresses are stored in the ROM after the end of the function
 ; ROM5 7029 to 7034
+label7029:
 ld   hl,7035        ; Load constant value 7035 into HL
 add  a              ; Double A, which currently contains the index of the selected profile
 ld   d,00           ; Clear D and load A into E
@@ -13,6 +14,7 @@ ret
 
 ; The opcodes for these instructions correspond to SRAM addresses - they are not actually executed
 ; ROM5 7035 to 703C
+label7035:
 add  c              ; 81
 cp   h              ; BC       Profile 1: BC81
 ld   bc,81BD        ; 01 BD 81 Profile 2: BD01

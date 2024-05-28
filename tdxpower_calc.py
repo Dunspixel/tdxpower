@@ -30,10 +30,10 @@ def set_upper(val):
     val = val % pow2_16
     power = (power & upper_mask) + (val * pow2_16)
 
-# This bit-shift loop divides score by divisor to get power
+# This bit-shift loop divides score/power by denominator to get a new power value
 # I had no idea division was this complex
-# Divisor is lines when calculating single game power, and games played when calculating profile power
-def bitshift_loop(divisor):
+# denominator is lines when calculating single game power, and games played when calculating profile power
+def divide_power_by(denominator):
     global power
 
     i = 16      # Loop counter
@@ -42,22 +42,21 @@ def bitshift_loop(divisor):
 
     while i > 0:
         # Double power and add carry flag
-        # HACK: The actual game does not do the zero check which I added here (it's probably somewhere else)
         power <<= 1
-        if cf & (power > 0):
+        if cf:
             power += 1
 
         # Subtract divisor from upper bytes of power
         # Set carry flag if divisor is greater than this value
         a = get_upper()
-        a -= divisor
+        a -= denominator
         cf = cf | a < 0
         set_upper(a)
 
         if cf:
             # Add divisor to upper bytes of power
             a = get_upper()
-            a += divisor
+            a += denominator
             set_upper(a)
 
             # Set carry flag
@@ -75,7 +74,8 @@ def bitshift_loop(divisor):
 # 1-10: x0.25
 # 11-15: x0.5
 # 16-20: x0.75
-def low_line_penalty():
+# 21+: x1
+def apply_line_multiplier():
     global power
 
     if lines >= 16 and lines <= 20:
@@ -102,29 +102,37 @@ games = int(input("Games Played (prior to this one): "))
 #print("Marathon = 0, Ultra = 1, 40Lines = 2")
 #mode = int(input("Game Mode: "))
 
+cur_game_power = 0
+new_profile_power = 0
+
+# Lines is a 2-byte value, so it will overflow if it is greater than 65,535
+lines = lines % pow2_16
+
+# Games played stops incrementing once it reaches 5
 if games > 5:
     games = 5
 
-# Subtract soft-drop points from score, applying bitmask
-# This effectively adds soft-drop % 16 to score before running calculation
-power = score - (softdrop & sd_mask)
-bitshift_loop(lines)
-low_line_penalty()
+if lines > 0:
+    # Subtract soft-drop points from score, applying bitmask
+    # This effectively adds soft-drop % 16 to score before running calculation
+    power = score - (softdrop & sd_mask)
+    divide_power_by(lines)
+    apply_line_multiplier()
 
-# Current Game Power has been calculated
-cur_game_power = power
+    # Current Game Power has been calculated
+    cur_game_power = power
 
-#if mode == fortylines:
-    # TODO: 40Lines specific logic
+    #if mode == fortylines:
+        # TODO: 40Lines specific logic
 
-# Calculate new profile power - (G + P * N) / N+1
-# G is Current Game Power, P is previous Profile Power, and N is Games Played
-mult_recent_power = profile_power * games
-power = cur_game_power + mult_recent_power
-bitshift_loop(games + 1)
+    # Calculate new profile power - (G + P * N) / N+1
+    # G is Current Game Power, P is previous Profile Power, and N is Games Played
+    mult_recent_power = profile_power * games
+    power = cur_game_power + mult_recent_power
+    divide_power_by(games + 1)
 
-# New Profile Power has been calculated
-new_profile_power = power
+    # New Profile Power has been calculated
+    new_profile_power = power
 
 print("Your Single Game Power is " + str(cur_game_power))
 print("Your new Profile Power is " + str(new_profile_power))

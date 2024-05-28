@@ -13,18 +13,24 @@ Note: There's some extra logic for 40Lines mode which I haven't looked into yet.
 ## Calculations
 These calculations are run after you press A on the Game Over screen to calculate your power.
 
-Pc = (((S - D + (D % 16)) / L) * M
-Pn = (Pc + Pp * N) / (N + 1)
+<ul>
+    <li>Pc = (((S - D + (D % 16)) / L) * M</li>
+    <li>Pn = (Pc + Pp * N) / (N + 1)</li>
+</ul>
 
-Pc = Current Game Power
-Pp = Previous Profile Power
-Pn = New Profile Power
-S = Score
-D = Soft-drop points
-L = Lines
-M = Line Multiplier
-    If L is between 1 and 10, M is 0.25
-    If L is between 11 and 15, M is 0.5
-    If L is between 16 and 20, M is 0.75
-    Else M is 1
-N = Number of games played previously (Max 5)
+<ul>
+    <li>Pc = Current Game Power</li>
+    <li>Pp = Previous Profile Power</li>
+    <li>Pn = New Profile Power</li>
+    <li>S = Score</li>
+    <li>D = Soft-drop points</li>
+    <li>L = Lines</li>
+    <li>M = Line Multiplier</li>
+    <ul>
+        <li>If L is between 1 and 10, M is 0.25</li>
+        <li>If L is between 11 and 15, M is 0.5</li>
+        <li>If L is between 16 and 20, M is 0.75</li>
+        <li>Else M is 1</li>
+    </ul>
+    <li>N = Number of games played previously (Max 5)</li>
+</ul>

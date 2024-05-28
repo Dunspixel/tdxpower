@@ -11,7 +11,8 @@ but I plan on tidying it up later so it's easier to follow.
 Note: There's some extra logic for 40Lines mode which I haven't looked into yet. I will implement this later.
 
 ## Calculations
-These calculations are run after you press A on the Game Over screen to calculate your power.
+These calculations are run after you press A on the Game Over screen. If there is a celebratory cutscene, the calculations will run after
+the cutscene ends.
 
 <ul>
     <li>Pc = (((S - D + (D % 16)) / L) * M</li>

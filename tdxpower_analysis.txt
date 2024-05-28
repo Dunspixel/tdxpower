@@ -1,6 +1,3 @@
-The code below starts after exiting from the Game Over screen.
-If there is a celebratory cutscene, this will execute after the cutscene finishes.
-
 Note: Registers in uppercase, flags in lowercase
 
 ROM5

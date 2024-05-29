@@ -123,17 +123,6 @@
 ; This function contains a loop after the XOR, run 3 times
 ; Adds AF8D-AF8F to BC83-BC85 as decimal values
 ; In other words, adds the lines from your current game to your profile total
-7055 - XOR A with itself
-7056 - Load value pointed by DE into A
-7057 - Add value pointed by HL + c to A
-; This DAA means treat the addition as BCD, not hex
-7058 - Decimal Adjust Accumulator
-7059 - Load value of A into address pointed by DE
-705A - Increment E
-705B - Increment L
-705C - Decrement C
-705D - Jump to 7056 if z is false
-705F - Return from function
 
 ; Set HL to Profile Power
 6F8F - Pop stack into HL (address BC83)

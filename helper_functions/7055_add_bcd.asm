@@ -1,5 +1,6 @@
 ; This function adds the BCD value pointed to by registers HL to the BCD value pointed to by registers DE
 ; The number of bytes to add is determined by the loop counter in register C
+; ROM5 7055 to 705F
 label7055:
 xor  a              ; XOR A with itself, clearing it
 label7056:

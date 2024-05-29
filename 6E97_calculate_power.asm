@@ -2,7 +2,7 @@
 ; The calculation considers score, soft-drop points, lines, previous power, and number of games played previously.
 ; ROM5 6E97 to 6FDE
 label6E97:
-ld   a,(C119)       ; TODO: Analysis of 6E97 to 6EB9
+ld   a,(C119)       ; TODO: Analyse 6E97-6EB9
 and  a
 ret  z
 ld   hl,BFF0
@@ -27,9 +27,11 @@ ldi  (hl),a
 ld   a,(hl)
 adc  b
 ld   (hl),a
-ld   hl,AC26        ; Load score (S) pointer into HL
-ld   de,AFB2        ; Load soft-drop points (SD) pointer into DE
-ld   b,00           ; This section subtracts SD (excluding the lowest nybble) from S, resulting in a value of S - SD + (SD % 16)
+
+; Subtract soft-drop points (SD) from score (S), add SD % 16, then divide new S by lines (L)
+ld   hl,AC26        ; Load S pointer into HL
+ld   de,AFB2        ; Load SD pointer into DE
+ld   b,00
 ld   a,(de)         ; Load lower byte of SD into A
 and  a,F0           ; Discard lower nybble of SD
 ld   c,a            ; Load A into C
@@ -49,7 +51,7 @@ ldi  (hl),a         ; Replace third byte of S in SRAM with A, then increment HL 
 ld   a,(hl)         ; Load highest byte of S into A
 sbc  b
 ld   (hl),a         ; Replace highest byte of S in SRAM with A
-ld   hl,AC24        ; Load lines (L) pointer into HL
+ld   hl,AC24        ; Load L pointer into HL
 ld   a,(AC26)       ; Load all bytes of S into registers BCDE
 ld   e,a
 ld   a,(AC27)
@@ -58,45 +60,59 @@ ld   a,(AC28)
 ld   c,a
 ld   a,(AC29)
 ld   b,a
-call 0637           ; See helper_functions/0637_divide - This divides the score by the number of lines and puts the result in DE
-ld   hl,AC25        ; The rest of the analysis is currently in the infodump
-ldd  a,(hl)         ; TODO: Tidy up the infodump and put it in here
+call 0637           ; 0637_divide - This divides S by L and puts the resulting power (Pc) in DE
+
+; Multiply Pc by a line multiplier - x0.25 if L is 1-10, x0.5 if L is 11-15, x0.75 if L is 16-20, else do nothing (x1)
+ld   hl,AC25        ; Pointer to upper byte of L
+ldd  a,(hl)         ; Load upper byte of L into A and decrement HL
+and  a              ; This AND sets the zero flag if upper byte of L is zero
+jr   nz,label6F25   ; Jump to 6F25 and skip line multiplier if non-zero (i.e. more than 255 lines)
+ld   a,(hl)         ; Load lower byte of L into A
 and  a
-jr   nz,label6F25
-ld   a,(hl)
-and  a
-jr   z,label6F22
-cp   a,0B
-jr   c,label6F18
+jr   z,label6F22    ; Jump to 6F22 if line count is 0
+cp   a,0B           ; This sets the carry flag if A is less than hex 0B
+jr   c,label6F18    ; Jump to 6F18 if A is between 1 and 10
 cp   a,10
-jr   c,label6F1C
+jr   c,label6F1C    ; Jump to 6F1C if A is between 11 and 15
 cp   a,15
-jr   nc,label6F25
-ld   h,d
+jr   nc,label6F25   ; Jump to 6F25 if A is between 16 and 20 (technically, not 21 or higher)
+
+; This section will only run if cleared lines is between 16 and 20 - multiply DE by x0.75
+ld   h,d            ; Copy P from DE to HL
 ld   l,e
-srl  h
+srl  h              ; Bit-shift HL to the right twice
 rr   l
 srl  h
 rr   l
-ld   a,e
-sub  l
-ld   e,a
+ld   a,e            ; Load E into A
+sub  l              ; Subtract L from A - This effectively reduces power by a quarter
+ld   e,a            ; Load A back into E
 jr   nc,label6F13
-dec  d
+dec  d              ; If subtraction caused an overflow, subtract carry flag from D
 label6F13:
-ld   a,d
-sub  h
-ld   d,a
+ld   a,d            ; Load D into A
+sub  h              ; Subtract H from A
+ld   d,a            ; Load A back into E
 jr   label6F25
+
+; This section will only run if cleared lines is between 1 and 10 - multiply DE by x0.5
 label6F18:
-srl  d
+srl  d              ; Bit-shift DE to the right
 rr   e
+
+; This section will only run if cleared lines is between 1 and 15 - multiply DE by x0.5
+; If previous section run due to lines being between 1 and 10, effective multiplier is x0.25
 label6F1C:
 srl  d
 rr   e
-jr   label6F25
+jr   label6F25      ; Jump to 6F25
+
+; This section is only executed if cleared lines is 0
 label6F22:
-ld   de,0000
+ld   de,0000        ; Set power to zero
+
+; TODO: The rest of the analysis is currently in the infodump. I will move it here later.
+
 label6F25:
 ld   a,d
 ld   (DB61),a
@@ -135,8 +151,11 @@ jr   nz,label6F55
 ld   a,(AC0A)
 cp   a,02
 jr   nz,label6F83
-ld   a,(DB61)       ; This section will only run if the current mode is Sprint
-ld   d,a            ; TODO: Analyse 6F62-6F80
+
+; This section will only run if the current mode is 40Lines
+; TODO: Analyse 6F62-6F80
+ld   a,(DB61)       
+ld   d,a
 ld   a,(DB60)
 ld   e,a
 push de
@@ -144,7 +163,7 @@ ld   hl,AC24
 ldi  a,(hl)
 ld   e,a
 ld   d,(hl)
-call label7060      ; TODO: Analyse 7060 helper function
+call label7060      ; TODO: Analyse 7060_40lines_logic
 ld   a,(DB64)
 ld   (AF8D),a
 pop  de
@@ -152,6 +171,7 @@ ld   a,d
 ld   (DB61),a
 ld   a,e
 ld   (DB60),a
+
 label6F83:
 pop  hl
 push hl
@@ -189,6 +209,7 @@ ld   e,l
 ld   hl,DB68
 inc  (hl)
 call 0637
+
 pop  hl             ; TODO: Analyse 6FBA to end of function
 ld   (hl),e
 inc  l

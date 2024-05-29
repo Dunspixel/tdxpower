@@ -4,7 +4,7 @@
 # The original source code was probably a lot simpler and easy to understand than this.
 
 # Single game power can be calculated from Score, Lines, and Soft-Drop points.
-# This is then added to (profile power * max(games played, 5)) and divided by max(games played, 5) + 1.
+# This is then added to (profile power * min(games played, 5)) and divided by min(games played, 5) + 1.
 
 # Currently, this only works for Marathon and Ultra modes.
 # There's some extra logic which is applied for 40Lines mode, but I haven't analysed that yet.
@@ -70,7 +70,8 @@ def divide_power_by(denominator):
     power <<= 1
     power = power % pow2_16
 
-# Applies a penalty if 20 lines or fewer
+# Applies a multiplier if 20 lines or fewer
+# 0: x0
 # 1-10: x0.25
 # 11-15: x0.5
 # 16-20: x0.75
@@ -78,13 +79,12 @@ def divide_power_by(denominator):
 def apply_line_multiplier():
     global power
 
+    # Set power to zero if no lines cleared
+    if lines == 0:
+        power = 0
+
     if lines >= 16 and lines <= 20:
         temp_power = power >> 2
-
-        # Is this some sort of signed/unsigned conversion?
-        if temp_power % pow2_8 > power & pow2_8:
-            power -= pow2_8
-
         power -= temp_power
 
     if lines >= 1 and lines <= 10:
@@ -112,27 +112,26 @@ lines = lines % pow2_16
 if games > 5:
     games = 5
 
-if lines > 0:
-    # Subtract soft-drop points from score, applying bitmask
-    # This effectively adds soft-drop % 16 to score before running calculation
-    power = score - (softdrop & sd_mask)
-    divide_power_by(lines)
-    apply_line_multiplier()
+# Subtract soft-drop points from score, applying bitmask
+# This effectively adds soft-drop % 16 to score before running calculation
+power = score - (softdrop & sd_mask)
+divide_power_by(lines)
+apply_line_multiplier()
 
-    # Current Game Power has been calculated
-    cur_game_power = power
+# Current Game Power has been calculated
+cur_game_power = power
 
-    #if mode == fortylines:
-        # TODO: 40Lines specific logic
+#if mode == fortylines:
+    # TODO: 40Lines specific logic
 
-    # Calculate new profile power - (G + P * N) / N+1
-    # G is Current Game Power, P is previous Profile Power, and N is Games Played
-    mult_recent_power = profile_power * games
-    power = cur_game_power + mult_recent_power
-    divide_power_by(games + 1)
+# Calculate new profile power - (G + P * N) / N+1
+# G is Current Game Power, P is previous Profile Power, and N is Games Played
+mult_recent_power = profile_power * games
+power = cur_game_power + mult_recent_power
+divide_power_by(games + 1)
 
-    # New Profile Power has been calculated
-    new_profile_power = power
+# New Profile Power has been calculated
+new_profile_power = power
 
 print("Your Single Game Power is " + str(cur_game_power))
 print("Your new Profile Power is " + str(new_profile_power))

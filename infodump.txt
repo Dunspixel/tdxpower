@@ -1,57 +1,3 @@
-; Check lines
-6EEC - Load AC25 pointer into HL
-6EEF - Load value from AC25 (via HL) into A and decrement HL to AC24
-6EF0 - AND A with itself
-6EF1 - Jump to 6F25 if z is false
-
-; 6EF0 will set z to true and run this section if A (i.e. lines / 256) is 0
-6EF3 - Load value of AC24 into A
-6EF4 - AND A with itself
-6EF5 - Jump to 6F25 if z is true
-
-; 6EF5 will set z to true and SKIP this section if A (i.e. lines % 256) is 0
-; This section will only run if cleared lines is between 1 and 255
-6EF7 - Set c to true if A is less than OB
-6EF9 - Jump to 6F18 if c is true
-6EFB - Set c to true if A is less than 10
-6EFD - Jump to 6F1C if c is true
-6EFF - Set c to true if A is less than 15
-6F01 - Jump to 6F25 is c is false
-
-; This section will only run if cleared lines is between 16 and 20
-6F03 - Load value of D into H
-6F04 - Load value of E into L
-6F05 - Bit-shift H to the right
-6F07 - Bit-shift L to the right, including c
-6F09 - Bit-shift H to the right
-6F0B - Bit-shift L to the right, including c
-6F0D - Load value of E into A
-6F0E - Subtract value of L from A
-6F0F - Load value of A into E
-6F10 - Jump to 6F13 if c is false
-
-; This will only run if L is greater than E
-; I have no idea why it does this
-6F12 - Decrement D
-
-; Effectively reduce power in DE by a quarter
-6F13 - Load value of D into A
-6F14 - Subtract value of H from A
-6F15 - Load value of A into D
-6F16 - Jump to 6F25
-
-; This section will only run if cleared lines is between 1 and 10
-6F18 - Bit-shift D to the right
-6F1A - Bit-shift E to the right, including c
-
-; This section will only run if cleared lines is between 1 and 15
-6F1C - Bit-shift D to the right
-6F1E - Bit-shift E to the right, including c
-6F20 - Jump to 6F25
-
-; I don't think this is hit, unless something else jumps here
-6F22 - Set DE to 0000
-
 ; Store DE (Current Game Power) in memory
 6F25 - Load value of D into A
 6F26 - Load value of A into DB61
@@ -118,11 +64,8 @@
 6F86 - Load value of L into E
 6F87 - Load constant value AF8D into HL
 6F8A - Load constant value 03 into C
+; Add AF8D-AF8F (lines from your current game) to BC83-BC85 (profile total) as decimal values
 6F8C - Call function 7055
-
-; This function contains a loop after the XOR, run 3 times
-; Adds AF8D-AF8F to BC83-BC85 as decimal values
-; In other words, adds the lines from your current game to your profile total
 
 ; Set HL to Profile Power
 6F8F - Pop stack into HL (address BC83)

@@ -5,12 +5,16 @@ label0637:
 xor  a              ; XOR A with itself, clearing it
 ld   a,10           ; Initialse loop counter to hex 10 (dec 16), then store in FF88
 ld   (ff00+88),a
-label063C:          ; Loop start
+
+; Loop start
+label063C:
 rl   e              ; Bit-shift BCDE to the left
 rl   d
 rl   c
 rl   b
-ld   a,c            ; This section subtracts the denominator from the upper two bytes of the numerator
+
+; This section subtracts the denominator from the upper two bytes of the numerator
+ld   a,c
 sub  (hl)           ; Subtract lower byte of denominator from C
 ld   c,a
 inc  hl             ; Increment HL to point to upper byte of denominator
@@ -19,7 +23,9 @@ sbc  (hl)           ; Subtract upper byte of denominator from B - if C now has a
 ld   b,a
 dec  hl             ; Decrement HL to point to lower byte
 jr   nc,label0657   ; If B is still "positive", jump to 0657
-ld   a,c            ; This section adds the denominator to the upper two bytes of the numerator
+
+; This section adds the denominator to the upper two bytes of the numerator
+ld   a,c
 add  (hl)           ; Add lower byte of denominator to C
 ld   c,a
 inc  hl             ; Increment HL to point to upper byte of denominator
@@ -27,7 +33,8 @@ ld   a,b
 adc  (hl)           ; Subtract upper byte of denominator from B - if adding to C caused an overflow, add 1 to B
 ld   b,a
 dec  hl             ; Decrement HL to point to lower byte, ready for next iteration
-scf                 ; Clear negative/carry flags
+scf                 ; Set carry flag to 1, clear negative/half-carry flags
+
 label0657:
 ccf                 ; Invert carry flag
 ld   a,(ff00+88)    ; Decrement loop counter

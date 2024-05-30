@@ -11,7 +11,7 @@ I hope this makes sense to people who know GB assembly better than me!
 These calculations are run after you press A on the Game Over screen. If there is a celebratory cutscene, the calculations will run after the cutscene ends.
 
 <ul>
-    <li>Pc = (((S - D + (D % 16)) / L) * M</li>
+    <li>Pc = ((S - D + (D % 16)) / L) * M</li>
     <li>Pn = (Pc + Pp * N) / (N + 1)</li>
 </ul>
 
@@ -33,10 +33,12 @@ These calculations are run after you press A on the Game Over screen. If there i
 </ul>
 
 ## Maximum Power
-In Ultra mode, the maximum power is 3,000. This can be achieved by clearing at least 24 lines and finishing the game with a 100% Tetris rate.
+In Ultra mode, the maximum power is 3,000. This can be achieved by playing on level 9, clearing at least 24 lines, and finishing the game with a 100% Tetris rate.
 
-In Marathon mode, the maximum power by developer-intended means is 6,001. This can be achieved by clearing 417 consecutive Tetrises to score a maxout (technically 10,010,400 points), then topping out with a final line count of 1,668.
+In Marathon mode, the maximum power by developer-intended means is 6,001. This can be achieved by starting on level 9, clearing 417 consecutive Tetrises to score a maxout (technically 10,010,400 points excluding soft-drop), then topping out with a final line count of 1,668.
 
-Since the internal 4-byte score increases after the counter maxes out, the highest power achievable without overflows is 6,292. This is achieved by scoring a further 15,966 consecutive Tetrises and topping out with a final line count of 65,532 and an internal score of 412,353,600.
+Since the internal 4-byte score increases after the counter maxes out, the highest power achievable without overflows is 6,292. This is achieved by scoring a further 15,966 consecutive Tetrises and topping out with a final line count of 65,532 and an internal score of 412,353,600 (excluding soft-drop).
 
-By overflowing the line counter and finishing with very specific score/line values, a theoretical maximum power of 65,535 can be achieved.
+The influence of soft-drop points are too small to impact these maximum power values in any meaningful way.
+
+By overflowing the line counter and finishing with very specific score/line values, a theoretical maximum power of 65,535 can be achieved. Due to the effective line counts being much lower, the influence of soft-drop points actually does affect the power value in this case.

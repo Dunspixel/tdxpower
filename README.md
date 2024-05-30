@@ -1,13 +1,11 @@
 # tdxpower
-This is my (currently incomplete) analysis of the assembly code used to calculate Power in Tetris DX, plus a calculator which recreates it.
+This is a Python script which calculates Power in Tetris DX (both for single games and overall profile) and an analysis of the assembly code used in the game. It currently only works for Marathon and Ultra modes, as the additional 40Lines logic has not yet been analysed/implemented.
 
 It's my first time trying to analyse and reverse-engineer assembly code, so I'm not very good at it.
 
 If you'd like to read the analysis, please start with 6E97_calculate_power.asm, then refer to the helper functions and the infodump when you get to them. For the time being, most of the analysis is in the infodump which I intend to tidy up and add to the assembly code comments later.
 
 I hope this makes sense to people who know GB assembly better than me!
-
-Note: There's some extra logic for 40Lines mode which I haven't looked into yet. I will implement this later.
 
 ## Calculations
 These calculations are run after you press A on the Game Over screen. If there is a celebratory cutscene, the calculations will run after the cutscene ends.
@@ -33,3 +31,12 @@ These calculations are run after you press A on the Game Over screen. If there i
     </ul>
     <li>N = Number of games played previously (Max 5)</li>
 </ul>
+
+## Maximum Power
+In Ultra mode, the maximum power is 3,000. This can be achieved by clearing at least 24 lines and finishing the game with a 100% Tetris rate.
+
+In Marathon mode, the maximum power by developer-intended means is 6,001. This can be achieved by clearing 417 consecutive Tetrises to score a maxout (technically 10,010,400 points), then topping out with a final line count of 1,668.
+
+Since the internal 4-byte score increases after the counter maxes out, the highest power achievable without overflows is 6,292. This is achieved by scoring a further 15,966 consecutive Tetrises and topping out with a final line count of 65,532 and an internal score of 412,353,600.
+
+By overflowing the line counter and finishing with very specific score/line values, a theoretical maximum power of 65,535 can be achieved.

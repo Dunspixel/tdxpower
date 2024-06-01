@@ -24,6 +24,7 @@ These calculations are run after you press A on the Game Over screen. If there i
     <li>L = Lines</li>
     <li>M = Line Multiplier</li>
     <ul>
+        <li>If L is 0, M is 0.25</li>
         <li>If L is between 1 and 10, M is 0.25</li>
         <li>If L is between 11 and 15, M is 0.5</li>
         <li>If L is between 16 and 20, M is 0.75</li>

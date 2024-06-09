@@ -1,4 +1,4 @@
-; This function gets the SRAM address of the selected profile, plus an offset of 01
+; This function gets the SRAM address of the selected profile, plus an offset of 01, and loads it into HL
 ; The addresses are stored in the ROM after the end of the function
 ; ROM5 7029 to 7034
 label7029:

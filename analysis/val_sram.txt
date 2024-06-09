@@ -41,7 +41,7 @@ Profile Offsets
 
 Notes
 AF8A-AF8C - Displayed BCD Score is capped at 9,999,999
-AC26-AC29 - Internal hex score is NOT capped, and can be increased to 2,147,483,647 before overflowing
+AC26-AC29 - Internal score is NOT capped, and can be increased to 4,294,967,295 before overflowing
 AC24-AC25 - Internal lines will overflow at 65,536, but this will not affect displayed BCD lines
 AF8D-AF8F - If BCD lines is over 99,999, the first digit will not be displayed (e.g. 100,000 will display as 00000)
 Profile + 02 - Number of games played is capped at 5

@@ -1,4 +1,4 @@
-These values are populated during power calculation
+These are temporary values used during power calculation
 
 DB60 - Current Game Power (Lower byte)
 DB61 - Current Game Power (Uower byte)

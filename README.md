@@ -1,11 +1,9 @@
 # tdxpower
 This is a Python script which calculates Power in Tetris DX (both for single games and overall profile) and an analysis of the assembly code used in the game. It currently only works for Marathon and Ultra modes, as the additional 40Lines logic has not yet been analysed/implemented.
 
-It's my first time trying to analyse and reverse-engineer assembly code, so I'm not very good at it.
+If you'd like to read the analysis, please start with 6E97_calculate_power.asm, then refer to the helper functions, val_sram, val_wram, and the infodump as necessary. For the time being, most of the analysis is in the infodump which I intend to tidy up and add to the assembly code comments later.
 
-If you'd like to read the analysis, please start with 6E97_calculate_power.asm, then refer to the helper functions and the infodump when you get to them. For the time being, most of the analysis is in the infodump which I intend to tidy up and add to the assembly code comments later.
-
-I hope this makes sense to people who know GB assembly better than me!
+This is my first time trying to analyse and reverse-engineer assembly code, so I'm not very good at it. I hope it makes sense to people who know GB assembly better than me!
 
 ## Calculations
 These calculations are run after you press A on the Game Over screen. If there is a celebratory cutscene, the calculations will run after the cutscene ends.
@@ -40,6 +38,6 @@ In Marathon mode, the maximum power by developer-intended means is 6,001. This c
 
 Since the internal 4-byte score increases after the counter maxes out, the highest power achievable without overflows is 6,292. This is achieved by scoring a further 15,966 consecutive Tetrises and topping out with a final line count of 65,532 and an internal score of 412,353,600 (excluding soft-drop).
 
-The influence of soft-drop points are too small to impact these maximum power values in any meaningful way.
+The influence of soft-drop points is too small to impact these maximum power values in any meaningful way.
 
-By overflowing the line counter and finishing with very specific score/line values, a theoretical maximum power of 65,535 can be achieved. Due to the effective line counts being much lower, the influence of soft-drop points actually does affect the power value in this case.
+By overflowing the line counter and finishing with very specific score/line values, a theoretical maximum power of 65,535 can be achieved. Due to the effective line counts being much lower, the influence of soft-drop points actually does affect the power value in this case. It is also not necessary to maintain a 100% Tetris rate.

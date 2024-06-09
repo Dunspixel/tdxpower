@@ -1,5 +1,5 @@
 These are temporary values used during power calculation
 
 DB60 - Current Game Power (Lower byte)
-DB61 - Current Game Power (Uower byte)
+DB61 - Current Game Power (Upper byte)
 DB68 - Number of games played (max 6)

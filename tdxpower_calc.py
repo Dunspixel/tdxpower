@@ -13,33 +13,54 @@
 global power
 global lines
 
-sd_mask = 0xFFFFFFF0    # Soft-drop bitmask
-upper_mask = 0x0000FFFF # Bitmask for reading/writing upper two bytes
-pow2_16 = 65536         # Coefficient for writing upper two bytes
-pow2_8 = 256            # Coefficient for byte operations
-marathon = 0
-ultra = 1
-fortylines = 2
+sd_mask = 0xFFFFFFF0 # Soft-drop bitmask
+b_mask = 0x00FFFFFF  # Bitmask for reading/writing register B
+c_mask = 0xFF00FFFF  # Bitmask for reading/writing register C
+d_mask = 0xFFFF00FF  # Bitmask for reading/writing register D
+pow2_24 = 16777216   # Coefficient for register B
+pow2_16 = 65536      # Coefficient for register C and two-byte operations
+pow2_8 = 256         # Coefficient for register D and byte operations
 
-def get_upper():
-    # Get the upper two bytes of power
-    return int(power / pow2_16)
+# Get value of B register
+def get_b():
+    return int(power / pow2_24)
 
-def set_upper(val):
-    # Set the upper two bytes of power
+# Set value of B register
+def set_b(val):
     global power
-    val = val % pow2_16
-    power = (power & upper_mask) + (val * pow2_16)
+    val = val % pow2_8
+    power = (power & b_mask) + (val * pow2_24)
+
+# Get value of C register
+def get_c():
+    return int(power / pow2_16) % pow2_8
+
+# Set value of C register
+def set_c(val):
+    global power
+    val = val % pow2_8
+    power = (power & c_mask) + (val * pow2_16)
+
+# Get value of D register
+def get_d():
+    return int(power / pow2_8) % pow2_8
+
+# Set value of D register
+def set_d(val):
+    global power
+    val = val % pow2_8
+    power = (power & d_mask) + (val * pow2_8)
 
 # This bit-shift loop divides score/power by denominator to get a new power value
 # I had no idea division was this complex
-# denominator is lines when calculating single game power, and games played when calculating profile power
+# denominator is lines when calculating single game power, and (games played + 1) when calculating profile power
+# If the effective result of division is greater than 65,535, then this will return 65,535.
 def divide_power_by(denominator):
     global power
 
-    i = 16      # Loop counter
-    a = 0       # A register (note: functionality is consolidated to work with two bytes together)
-    cf = False  # Carry flag
+    i = 16     # Loop counter
+    a = 0      # Accumulator
+    cf = False # Carry flag
 
     while i > 0:
         # Double power and add carry flag
@@ -49,16 +70,33 @@ def divide_power_by(denominator):
 
         # Subtract divisor from upper bytes of power
         # Set carry flag if divisor is greater than this value
-        a = get_upper()
-        a -= denominator
+        a = get_c()
+        a -= denominator % pow2_8
         cf = cf | a < 0
-        set_upper(a)
+        set_c(a)
+
+        a = get_b()
+        a -= int(denominator / pow2_8)
+        if cf:
+            a -= 1
+            cf = False
+        cf = cf | a < 0
+        set_b(a)
 
         if cf:
             # Add divisor to upper bytes of power
-            a = get_upper()
-            a += denominator
-            set_upper(a)
+            a = get_c()
+            a += denominator % pow2_8
+            cf = cf | a >= pow2_8
+            set_c(a)
+
+            a = get_b()
+            a += int(denominator / pow2_8)
+            if cf:
+                a += 1
+                cf = False
+            cf = cf | a >= pow2_8
+            set_b(a)
 
             # Set carry flag
             cf = True

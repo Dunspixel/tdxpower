@@ -1,5 +1,6 @@
 ; This function divides the 4-byte value in registers BCDE (numerator) by the 2-byte value pointed to by registers HL (denominator)
 ; The resulting value will be stored in registers DE
+; If the effective result of division is greater than 65,535, then this value will be 65,535 (hex FFFF)
 ; ROM0 0637 to 0663
 label0637:
 xor  a              ; XOR A with itself, clearing it

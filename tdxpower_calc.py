@@ -1,4 +1,5 @@
-# Tetris DX Power Calculator v1.0.0 by Dunspixel
+# tdxpower v1.0.1
+# © 2024 Dunspixel
 
 # This is a recreation of the code used to calculate Power in Tetris DX, based on my analysis of the assembly code.
 # The original source code was probably a lot simpler and easy to understand than this.
@@ -68,6 +69,8 @@ def divide_power_by(denominator):
     
     # Double power and take lower two bytes
     power <<= 1
+    if cf:
+        power += 1
     power = power % pow2_16
 
 # Applies a multiplier if 20 lines or fewer

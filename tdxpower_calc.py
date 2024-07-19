@@ -144,29 +144,32 @@ games = int(input("Games Played (prior to this one): "))
 cur_game_power = 0
 new_profile_power = 0
 
-# Lines is a 2-byte value, so it will overflow if it is greater than 65,535
+# Soft-Drop Points (D) and Lines (L) are 2-byte values, so they will overflow if greater than 65,535
+softdrop = softdrop % pow2_16
 lines = lines % pow2_16
 
 # Games played stops incrementing once it reaches 5
 if games > 5:
     games = 5
 
-# Subtract soft-drop points from score, applying bitmask
-# This effectively adds soft-drop % 16 to score before running calculation
+# Subtract soft-drop points from score (S), applying bitmask
+# This effectively adds D % 16 to (S - D) before running calculation
 power = score - (softdrop & sd_mask)
 divide_power_by(lines)
+
+# Multiply by M, whose value is dependent on L
 apply_line_multiplier()
 
-# Current Game Power has been calculated
+# Current Game Power (Pc) has been calculated
 cur_game_power = power
 
-# Calculate new profile power - (G + P * N) / N+1
-# G is Current Game Power, P is previous Profile Power, and N is Games Played
+# Calculate new profile power - (Pc + Pp * N) / N+1
+# Pp is previous Profile Power, and N is Games Played
 mult_recent_power = profile_power * games
 power = cur_game_power + mult_recent_power
 divide_power_by(games + 1)
 
-# New Profile Power has been calculated
+# New Profile Power (Pn) has been calculated
 new_profile_power = power
 
 print("Your Single Game Power is " + str(cur_game_power))
